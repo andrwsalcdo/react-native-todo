@@ -43,6 +43,13 @@ class App extends React.Component {
 		});
 	};
 
+	handleDeleteItem = (key) => {
+		const newItems = this.state.items.filter(item => item.key !== key)
+		this.setState({
+			items: newItems
+		})
+	}
+
 	handleToggleComplete = (key, complete) => {
 		const newItems = this.state.items.map(item => {
 			if (item.key !== key) return item; 
@@ -63,6 +70,7 @@ class App extends React.Component {
 		<TodoItem text={item.text} 
 				complete={item.complete} 
 				onComplete={(complete) => this.handleToggleComplete(item.key,complete)}
+				onDelete={() => this.handleDeleteItem(item.key)}
 		/>;
 
 	todoItemSeparator = () => {
