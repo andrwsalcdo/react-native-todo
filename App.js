@@ -3,6 +3,8 @@ import { StyleSheet, Text, View, Keyboard, FlatList } from "react-native";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import TodoItem from "./components/TodoItem";
+import filterItems from './utils/helper';
+
 
 class App extends React.Component {
 	constructor(props) {
@@ -10,7 +12,9 @@ class App extends React.Component {
 		this.state = {
 			value: "",
 			items: [],
-			allComplete: false
+			allComplete: false,
+			filter: "ALL",
+			visibleItems: []
 		};
 	}
 
@@ -27,7 +31,17 @@ class App extends React.Component {
 		];
 		this.setState({
 			items: newItems,
-			value: ""
+			value: "",
+			visibleItems: filterItems(this.state.filter, newItems)
+		});
+	};
+
+	handleFilter = filter => {
+		const visibleItems = filterItems(filter, this.state.items);
+		this.setState({
+			items: this.state.items,
+			filter,
+			visibleItems		
 		});
 	};
 
@@ -39,42 +53,47 @@ class App extends React.Component {
 		}));
 		this.setState({
 			items: newItems,
-			allComplete: complete
+			allComplete: complete,
+			visibleItems: filterItems(this.state.filter, newItems)
 		});
 	};
 
-	handleDeleteItem = (key) => {
-		const newItems = this.state.items.filter(item => item.key !== key)
+	handleDeleteItem = key => {
+		const newItems = this.state.items.filter(item => item.key !== key);
 		this.setState({
-			items: newItems
-		})
-	}
+			items: newItems,
+			visibleItems: filterItems(this.state.filter, newItems)
+		});
+	};
 
 	handleToggleComplete = (key, complete) => {
 		const newItems = this.state.items.map(item => {
-			if (item.key !== key) return item; 
+			if (item.key !== key) return item;
 			return {
-				...item, 
+				...item,
 				complete
-			}
-		})
+			};
+		});
 		this.setState({
-			items: newItems
-		})
-	}
+			items: newItems,
+			visibleItems: filterItems(this.state.filter, newItems)
+		});
+	};
 
 	// key for each todo item
 	_keyExtractor = item => item.key;
 	// render the todo item component
-	renderTodoItem = ({ item }) => 
-		<TodoItem text={item.text} 
-				complete={item.complete} 
-				onComplete={(complete) => this.handleToggleComplete(item.key,complete)}
-				onDelete={() => this.handleDeleteItem(item.key)}
-		/>;
+	renderTodoItem = ({ item }) => (
+		<TodoItem
+			text={item.text}
+			complete={item.complete}
+			onComplete={complete => this.handleToggleComplete(item.key, complete)}
+			onDelete={() => this.handleDeleteItem(item.key)}
+		/>
+	);
 
 	todoItemSeparator = () => {
-    	return ( <View style={styles.todoItemSeparator} />);
+		return <View style={styles.todoItemSeparator} />;
 	};
 
 	render() {
@@ -89,15 +108,15 @@ class App extends React.Component {
 				<View style={styles.content}>
 					<FlatList
 						style={styles.list}
-						data={this.state.items}
+						data={this.state.visibleItems}
 						renderItem={this.renderTodoItem}
 						keyExtractor={this._keyExtractor}
 						// keyboard disappears when user scrolls the list
-            			onScroll={() => Keyboard.dismiss()}
+						onScroll={() => Keyboard.dismiss()}
 						ItemSeparatorComponent={this.todoItemSeparator}
 					/>
 				</View>
-				<Footer />
+				<Footer onFilter={this.handleFilter} filter={this.state.filter} />
 			</View>
 		);
 	}
@@ -117,7 +136,7 @@ const styles = StyleSheet.create({
 	},
 	todoItemSeparator: {
 		height: 1,
-		backgroundColor: "#CED0CE",
+		backgroundColor: "#CED0CE"
 	}
 });
 
