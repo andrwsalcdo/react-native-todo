@@ -80,6 +80,15 @@ class App extends React.Component {
 		});
 	};
 
+	handleClearAllComplete= () => {
+		const newItems = filterItems("ACTIVE", this.state.items); 
+		this.setState({
+			items: newItems, 
+			visibleItems: newItems,
+			filter: "ALL" //switch tab to 'all'. To prevent active items from displaying in completed tab. 
+		})
+	}
+
 	// key for each todo item
 	_keyExtractor = item => item.key;
 	// render the todo item component
@@ -117,7 +126,11 @@ class App extends React.Component {
 						ItemSeparatorComponent={this.todoItemSeparator}
 					/>
 				</View>
-				<Footer count={this.state.visibleItems.length || null} onFilter={this.handleFilter} filter={this.state.filter} />
+				<Footer 
+					count={this.state.visibleItems.length || null} 
+					onFilter={this.handleFilter} 
+					filter={this.state.filter}
+					onClearAllComplete={this.handleClearAllComplete} />
 			</View>
 		);
 	}

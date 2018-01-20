@@ -3,10 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
 class Footer extends Component {
 	render() {
-		const { filter, count } = this.props;
-		return (
+    const { filter, count } = this.props;
+    const counter = <Text>{count}</Text>;
+    return (
 			<View style={styles.container}>
-        <Text>{count}</Text>
+        {
+          // conditional rendering 
+          (count) ? counter : null          
+        }
 				<View style={styles.filters}>
           <TouchableOpacity 
               style={[styles.filter, filter === "ALL" && styles.selected]}
@@ -27,6 +31,13 @@ class Footer extends Component {
 						<Text>Completed</Text>
 					</TouchableOpacity>
 				</View>
+          {
+              (filter==="COMPLETED" && count > 0) 
+                 ? <TouchableOpacity onPress={this.props.onClearAllComplete}>
+                    <Text>Clear All</Text>
+                  </TouchableOpacity>
+                : null
+          }
 			</View>
 		);
 	}
@@ -37,7 +48,7 @@ const styles = StyleSheet.create({
 		padding: 16,
 		flexDirection: "row",
 		alignItems: "center",
-		justifyContent: "space-between"
+    justifyContent: "space-between"
 	},
 	filters: {
 		flexDirection: "row"
