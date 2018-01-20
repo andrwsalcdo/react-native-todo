@@ -43,13 +43,30 @@ class App extends React.Component {
 		});
 	};
 
+	handleToggleComplete = (key, complete) => {
+		const newItems = this.state.items.map(item => {
+			if (item.key !== key) return item; 
+			return {
+				...item, 
+				complete
+			}
+		})
+		this.setState({
+			items: newItems
+		})
+	}
+
 	// key for each todo item
 	_keyExtractor = item => item.key;
 	// render the todo item component
-	renderTodoItem = ({ item }) => <TodoItem text={item.text} />;
+	renderTodoItem = ({ item }) => 
+		<TodoItem text={item.text} 
+				complete={item.complete} 
+				onComplete={(complete) => this.handleToggleComplete(item.key,complete)}
+		/>;
 
 	todoItemSeparator = () => {
-    return ( <View style={styles.todoItemSeparator} />);
+    	return ( <View style={styles.todoItemSeparator} />);
 	};
 
 	render() {
@@ -68,7 +85,7 @@ class App extends React.Component {
 						renderItem={this.renderTodoItem}
 						keyExtractor={this._keyExtractor}
 						// keyboard disappears when user scrolls the list
-            onScroll={() => Keyboard.dismiss()}
+            			onScroll={() => Keyboard.dismiss()}
 						ItemSeparatorComponent={this.todoItemSeparator}
 					/>
 				</View>
