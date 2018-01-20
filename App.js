@@ -1,9 +1,9 @@
 import React from "react";
-import { StyleSheet, Text, View, Keyboard, FlatList } from "react-native";
+import { StyleSheet, Text, View, Keyboard, FlatList, AsyncStorage } from "react-native";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import TodoItem from "./components/TodoItem";
-import filterItems from './utils/helper';
+import { filterItems, setAsyncData } from "./utils/helper";
 
 
 class App extends React.Component {
@@ -16,6 +16,23 @@ class App extends React.Component {
 			filter: "ALL",
 			visibleItems: []
 		};
+	}
+	componentWillMount() {
+		this.getAsyncData(); 
+	}
+
+	getAsyncData = () => {
+		AsyncStorage.getItem("items").then(json => {
+			try {
+				const items = JSON.parse(json);
+				this.setState({
+					items: items,
+					visibleItems: items
+				});
+			} catch (e) {
+				console.log(e);
+			}
+		});
 	}
 
 	handleAddItem = () => {
@@ -34,6 +51,8 @@ class App extends React.Component {
 			value: "",
 			visibleItems: filterItems(this.state.filter, newItems)
 		});
+		// Set Async Storage
+		setAsyncData(filterItems(this.state.filter, newItems));
 	};
 
 	handleFilter = filter => {
@@ -41,7 +60,7 @@ class App extends React.Component {
 		this.setState({
 			items: this.state.items,
 			filter,
-			visibleItems		
+			visibleItems
 		});
 	};
 
@@ -56,6 +75,8 @@ class App extends React.Component {
 			allComplete: complete,
 			visibleItems: filterItems(this.state.filter, newItems)
 		});
+		// Set Async Storage
+		setAsyncData(newItems);
 	};
 
 	handleDeleteItem = key => {
@@ -64,6 +85,8 @@ class App extends React.Component {
 			items: newItems,
 			visibleItems: filterItems(this.state.filter, newItems)
 		});
+		// set async storage
+		setAsyncData(filterItems(this.state.filter, newItems));
 	};
 
 	handleToggleComplete = (key, complete) => {
@@ -78,16 +101,20 @@ class App extends React.Component {
 			items: newItems,
 			visibleItems: filterItems(this.state.filter, newItems)
 		});
+		// set async storage
+		setAsyncData(filterItems(this.state.filter, newItems));
 	};
 
-	handleClearAllComplete= () => {
-		const newItems = filterItems("ACTIVE", this.state.items); 
+	handleClearAllComplete = () => {
+		const newItems = filterItems("ACTIVE", this.state.items);
 		this.setState({
-			items: newItems, 
+			items: newItems,
 			visibleItems: newItems,
-			filter: "ALL" //switch tab to 'all'. To prevent active items from displaying in completed tab. 
-		})
-	}
+			filter: "ALL" //switch tab to 'all'. To prevent active items from displaying in completed tab.
+		});
+		// set async storage
+		setAsyncData(newItems);
+	};
 
 	// key for each todo item
 	_keyExtractor = item => item.key;
@@ -105,7 +132,6 @@ class App extends React.Component {
 		return <View style={styles.todoItemSeparator} />;
 	};
 
-	
 	render() {
 		return (
 			<View style={styles.container}>
@@ -126,11 +152,12 @@ class App extends React.Component {
 						ItemSeparatorComponent={this.todoItemSeparator}
 					/>
 				</View>
-				<Footer 
-					count={this.state.visibleItems.length || null} 
-					onFilter={this.handleFilter} 
+				<Footer
+					count={this.state.visibleItems.length || null}
+					onFilter={this.handleFilter}
 					filter={this.state.filter}
-					onClearAllComplete={this.handleClearAllComplete} />
+					onClearAllComplete={this.handleClearAllComplete}
+				/>
 			</View>
 		);
 	}
