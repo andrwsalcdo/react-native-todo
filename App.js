@@ -96,6 +96,7 @@ class App extends React.Component {
 		return <View style={styles.todoItemSeparator} />;
 	};
 
+	
 	render() {
 		return (
 			<View style={styles.container}>
@@ -116,7 +117,7 @@ class App extends React.Component {
 						ItemSeparatorComponent={this.todoItemSeparator}
 					/>
 				</View>
-				<Footer onFilter={this.handleFilter} filter={this.state.filter} />
+				<Footer count={this.state.visibleItems.length || null} onFilter={this.handleFilter} filter={this.state.filter} />
 			</View>
 		);
 	}
