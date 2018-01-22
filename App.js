@@ -3,9 +3,8 @@ import { StyleSheet, Text, View, Keyboard, FlatList, AsyncStorage } from "react-
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import TodoItem from "./components/TodoItem";
-import Loading from './components/Loading'; 
+import Loading from "./components/Loading";
 import { filterItems, setAsyncData } from "./utils/helper";
-
 
 class App extends React.Component {
 	constructor(props) {
@@ -15,12 +14,12 @@ class App extends React.Component {
 			items: [],
 			allComplete: false,
 			filter: "ALL",
-			visibleItems: [], 
+			visibleItems: [],
 			loading: true
 		};
 	}
 	componentWillMount() {
-		this.getAsyncData(); 
+		this.getAsyncData();
 	}
 
 	getAsyncData = () => {
@@ -29,16 +28,16 @@ class App extends React.Component {
 				const items = JSON.parse(json);
 				this.setState({
 					items: items,
-					visibleItems: items, 
+					visibleItems: items,
 					loading: false
 				});
 			} catch (e) {
 				this.setState({
 					loading: false
-				})
+				});
 			}
 		});
-	}
+	};
 
 	handleAddItem = () => {
 		// don't add empty text to items
@@ -57,6 +56,36 @@ class App extends React.Component {
 			visibleItems: filterItems(this.state.filter, newItems)
 		});
 		// Set Async Storage
+		setAsyncData(filterItems(this.state.filter, newItems));
+	};
+
+	handleUpdateItemText = (key, text) => {
+		const newItems = this.state.items.map(item => {
+			if (item.key !== key) return item;
+			return {
+				...item,
+				text
+			};
+		});
+		this.setState({
+			items: newItems,
+			visibleItems: filterItems(this.state.filter, newItems)
+		});
+	};
+
+	handleToggleEditing = (key, editing) => {
+		const newItems = this.state.items.map(item => {
+			if (item.key !== key) return item;
+			return {
+				...item,
+				editing
+			};
+		});
+		this.setState({
+			items: newItems,
+			visibleItems: filterItems(this.state.filter, newItems)
+		});
+		// // Set Async Storage
 		setAsyncData(filterItems(this.state.filter, newItems));
 	};
 
@@ -128,6 +157,9 @@ class App extends React.Component {
 		<TodoItem
 			text={item.text}
 			complete={item.complete}
+			editing={item.editing}
+			onUpdate={text => this.handleUpdateItemText(item.key, text)}
+			onToggleEdit={editing => this.handleToggleEditing(item.key, editing)}
 			onComplete={complete => this.handleToggleComplete(item.key, complete)}
 			onDelete={() => this.handleDeleteItem(item.key)}
 		/>
@@ -165,7 +197,7 @@ class App extends React.Component {
 				/>
 				{/* loading indicator */}
 				{this.state.loading && <Loading />}
-			</View>
+			 </View> 
 		);
 	}
 }
