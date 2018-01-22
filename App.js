@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, Keyboard, FlatList, AsyncStorage } from "react-
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import TodoItem from "./components/TodoItem";
+import Loading from './components/Loading'; 
 import { filterItems, setAsyncData } from "./utils/helper";
 
 
@@ -14,7 +15,8 @@ class App extends React.Component {
 			items: [],
 			allComplete: false,
 			filter: "ALL",
-			visibleItems: []
+			visibleItems: [], 
+			loading: true
 		};
 	}
 	componentWillMount() {
@@ -27,10 +29,13 @@ class App extends React.Component {
 				const items = JSON.parse(json);
 				this.setState({
 					items: items,
-					visibleItems: items
+					visibleItems: items, 
+					loading: false
 				});
 			} catch (e) {
-				console.log(e);
+				this.setState({
+					loading: false
+				})
 			}
 		});
 	}
@@ -158,6 +163,8 @@ class App extends React.Component {
 					filter={this.state.filter}
 					onClearAllComplete={this.handleClearAllComplete}
 				/>
+				{/* loading indicator */}
+				{this.state.loading && <Loading />}
 			</View>
 		);
 	}
