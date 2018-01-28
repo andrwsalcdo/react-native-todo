@@ -7,7 +7,6 @@ import TodoItem from "./components/TodoItem";
 import Loading from "./components/Loading";
 import { filterItems, setAsyncData } from "./utils/helper";
 
-
 class App extends React.Component {
 	constructor(props) {
 		super(props);
@@ -28,17 +27,23 @@ class App extends React.Component {
 		AsyncStorage.getItem("items").then(json => {
 			try {
 				const items = JSON.parse(json);
-				this.setState({
-					items: items,
-					visibleItems: items,
-					loading: false
-				});
+				this.setData(items, items, { loading: false });
 			} catch (e) {
 				this.setState({
 					loading: false
 				});
 			}
 		});
+	};
+	
+	//handle data with this.setState & set async storage
+	setData = (items, visibleItems, otherState = {}) => {
+		this.setState({
+			items,
+			visibleItems,
+			...otherState
+		});
+		setAsyncData(items);
 	};
 
 	handleAddItem = () => {
@@ -52,13 +57,7 @@ class App extends React.Component {
 				complete: false
 			}
 		];
-		this.setState({
-			items: newItems,
-			value: "",
-			visibleItems: filterItems(this.state.filter, newItems)
-		});
-		// Set Async Storage
-		setAsyncData(filterItems(this.state.filter, newItems));
+		this.setData(newItems, filterItems(this.state.filter, newItems), { value: "" });
 	};
 
 	handleUpdateItemText = (key, text) => {
@@ -69,10 +68,7 @@ class App extends React.Component {
 				text
 			};
 		});
-		this.setState({
-			items: newItems,
-			visibleItems: filterItems(this.state.filter, newItems)
-		});
+		this.setData(newItems, filterItems(this.state.filter, newItems));
 	};
 
 	handleToggleEditing = (key, editing) => {
@@ -83,21 +79,12 @@ class App extends React.Component {
 				editing
 			};
 		});
-		this.setState({
-			items: newItems,
-			visibleItems: filterItems(this.state.filter, newItems)
-		});
-		// // Set Async Storage
-		setAsyncData(newItems); 
+		this.setData(newItems, filterItems(this.state.filter, newItems));
 	};
 
 	handleFilter = filter => {
 		const visibleItems = filterItems(filter, this.state.items);
-		this.setState({
-			items: this.state.items,
-			filter,
-			visibleItems
-		});
+		this.setData(this.state.items, visibleItems, { filter });
 	};
 
 	handleToggleAllComplete = () => {
@@ -106,23 +93,12 @@ class App extends React.Component {
 			...item,
 			complete
 		}));
-		this.setState({
-			items: newItems,
-			allComplete: complete,
-			visibleItems: filterItems(this.state.filter, newItems)
-		});
-		// Set Async Storage
-		setAsyncData(newItems);
+		this.setData(newItems, filterItems(this.state.filter, newItems), { allComplete: complete });
 	};
 
 	handleDeleteItem = key => {
 		const newItems = this.state.items.filter(item => item.key !== key);
-		this.setState({
-			items: newItems,
-			visibleItems: filterItems(this.state.filter, newItems)
-		});
-		// set async storage
-		setAsyncData(filterItems(this.state.filter, newItems));
+		this.setData(newItems, filterItems(this.state.filter, newItems));
 	};
 
 	handleToggleComplete = (key, complete) => {
@@ -133,23 +109,12 @@ class App extends React.Component {
 				complete
 			};
 		});
-		this.setState({
-			items: newItems,
-			visibleItems: filterItems(this.state.filter, newItems)
-		});
-		// set async storage
-		setAsyncData(filterItems(this.state.filter, newItems));
+		this.setData(newItems, filterItems(this.state.filter, newItems));
 	};
 
 	handleClearAllComplete = () => {
 		const newItems = filterItems("ACTIVE", this.state.items);
-		this.setState({
-			items: newItems,
-			visibleItems: newItems,
-			filter: "ALL" //switch tab to 'all'. To prevent active items from displaying in completed tab.
-		});
-		// set async storage
-		setAsyncData(newItems);
+		this.setData(newItems, filterItems(this.state.filter, newItems));
 	};
 
 	// key for each todo item
